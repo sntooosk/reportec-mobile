@@ -12,7 +12,14 @@ import {
   Animated,
 } from "react-native";
 import { getAuth } from "firebase/auth";
-import { collection, doc, setDoc, query, where, getDocs } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  setDoc,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import DropDownPicker from "react-native-dropdown-picker";
 import { db } from "../../utils/firebase";
 import { useAuth } from "../../context/AuthContext";
@@ -31,7 +38,7 @@ export default function Profile() {
   const [refreshing, setRefreshing] = useState(false);
   const [editing, setEditing] = useState(false);
   const [reports, setReports] = useState([]);
-  
+
   const [openSalaPicker, setOpenSalaPicker] = useState(false);
   const [salaOptions] = useState([
     { label: "1 DSB", value: "1 DSB" },
@@ -69,7 +76,10 @@ export default function Profile() {
   const fetchUserData = async () => {
     if (user) {
       try {
-        const userQuery = query(collection(db, "users"), where("userId", "==", user.uid));
+        const userQuery = query(
+          collection(db, "users"),
+          where("userId", "==", user.uid)
+        );
         const querySnapshot = await getDocs(userQuery);
 
         if (!querySnapshot.empty) {
@@ -87,9 +97,15 @@ export default function Profile() {
 
   const fetchUserReports = async () => {
     if (user) {
-      const reportsQuery = query(collection(db, "reports"), where("userId", "==", user.uid));
+      const reportsQuery = query(
+        collection(db, "reports"),
+        where("userId", "==", user.uid)
+      );
       const querySnapshot = await getDocs(reportsQuery);
-      const reportsList = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const reportsList = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
       setReports(reportsList);
     }
   };
@@ -113,7 +129,11 @@ export default function Profile() {
     try {
       setLoading(true);
       const userRef = doc(collection(db, "users"), user.uid);
-      await setDoc(userRef, { userId: user.uid, name, lastName, sala, number }, { merge: true });
+      await setDoc(
+        userRef,
+        { userId: user.uid, name, lastName, sala, number },
+        { merge: true }
+      );
       Alert.alert("Sucesso", "Dados atualizados");
       setEditing(false);
     } catch {
@@ -152,17 +172,25 @@ export default function Profile() {
           <Icon name="log-out" size={28} color="#FFF" />
         </Pressable>
       </View>
-      
+
       <Animated.View
-        style={[styles.formCard, { transform: [{ translateY: cardTranslateY }] }]}
+        style={[
+          styles.formCard,
+          { transform: [{ translateY: cardTranslateY }] },
+        ]}
       >
         <ScrollView
           contentContainerStyle={styles.scrollViewContent}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
           showsVerticalScrollIndicator={false} // Oculta a barra de rolagem
         >
           <TextInput
-            style={[styles.formInput, { backgroundColor: editing ? "#FAFAFA" : "#EFEFEF" }]}
+            style={[
+              styles.formInput,
+              { backgroundColor: editing ? "#FAFAFA" : "#EFEFEF" },
+            ]}
             placeholder="Nome"
             placeholderTextColor="#A9A9A9"
             onChangeText={setName}
@@ -170,14 +198,17 @@ export default function Profile() {
             editable={editing}
           />
           <TextInput
-            style={[styles.formInput, { backgroundColor: editing ? "#FAFAFA" : "#EFEFEF" }]}
+            style={[
+              styles.formInput,
+              { backgroundColor: editing ? "#FAFAFA" : "#EFEFEF" },
+            ]}
             placeholder="Sobrenome"
             placeholderTextColor="#A9A9A9"
             onChangeText={setLastName}
             value={lastName}
             editable={editing}
           />
-          
+
           {editing ? (
             <DropDownPicker
               open={openSalaPicker}
@@ -200,7 +231,10 @@ export default function Profile() {
           )}
 
           <TextInput
-            style={[styles.formInput, { backgroundColor: editing ? "#FAFAFA" : "#EFEFEF" }]}
+            style={[
+              styles.formInput,
+              { backgroundColor: editing ? "#FAFAFA" : "#EFEFEF" },
+            ]}
             placeholder="Número de celular"
             placeholderTextColor="#A9A9A9"
             onChangeText={formatPhoneNumber}
@@ -209,22 +243,46 @@ export default function Profile() {
             editable={editing}
           />
 
-          <Pressable style={styles.editButton} onPress={() => setEditing(!editing)}>
-            <Text style={styles.textButton}>{editing ? "Cancelar" : "Editar Perfil"}</Text>
+          <Pressable
+            style={styles.editButton}
+            onPress={() => setEditing(!editing)}
+          >
+            <Text style={styles.textButton}>
+              {editing ? "Cancelar" : "Editar Perfil"}
+            </Text>
           </Pressable>
 
           {editing && (
-            <Pressable style={styles.formButton} onPress={handleSaveProfile} disabled={loading}>
-              {loading ? <ActivityIndicator size="small" color="#FFF" /> : <Text style={styles.textButton}>Salvar</Text>}
+            <Pressable
+              style={styles.formButton}
+              onPress={handleSaveProfile}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="#FFF" />
+              ) : (
+                <Text style={styles.textButton}>Salvar</Text>
+              )}
             </Pressable>
           )}
 
           <Text style={styles.sectionTitle}>Suas Denúncias</Text>
           {reports.map((item) => (
             <View key={item.id} style={styles.reportItem}>
-              <Text style={styles.reportText}>Tipo: {item.bullyingType}</Text>
-              <Text style={styles.reportText}>Descrição: {item.description}</Text>
-              <Text style={[styles.reportText, getStatusColor(item.status)]}>Status: {item.status}</Text>
+              <View style={styles.reportTextRow}>
+                <Text style={styles.reportLabel}>Tipo: </Text>
+                <Text style={styles.reportValue}>{item.bullyingType}</Text>
+              </View>
+              <View style={styles.reportTextRow}>
+                <Text style={styles.reportLabel}>Descrição: </Text>
+                <Text style={styles.reportValue}>{item.description}</Text>
+              </View>
+              <View style={styles.reportTextRow}>
+                <Text style={styles.reportLabel}>Status: </Text>
+                <Text style={[styles.reportValue, getStatusColor(item.status)]}>
+                  {item.status}
+                </Text>
+              </View>
             </View>
           ))}
           {reports.length === 0 && (
@@ -250,6 +308,18 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingBottom: 50,
   },
+  reportTextRow: {
+    flexDirection: "row",
+    marginBottom: 5,
+  },
+  reportLabel: {
+    fontWeight: "bold",
+    color: "#333",
+  },
+  reportValue: {
+    color: "#333",
+  },
+  
   formCard: {
     width: "100%",
     backgroundColor: "#FFF",

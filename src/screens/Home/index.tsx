@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
@@ -18,6 +19,7 @@ export default function Home() {
   const [bullyingType, setBullyingType] = useState("");
   const [description, setDescription] = useState("");
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false); // Estado de carregamento
   const [userInfo, setUserInfo] = useState({
     name: "",
     lastName: "",
@@ -61,6 +63,7 @@ export default function Home() {
       return;
     }
 
+    setLoading(true); // Ativar carregamento
     try {
       await addDoc(collection(db, "reports"), {
         userId: user?.uid,
@@ -78,6 +81,8 @@ export default function Home() {
       setModalVisible(false);
     } catch (error) {
       Alert.alert("Erro", "Falha ao enviar o reporte.");
+    } finally {
+      setLoading(false); // Desativar carregamento
     }
   };
 
@@ -123,8 +128,13 @@ export default function Home() {
             <TouchableOpacity
               style={styles.submitButton}
               onPress={handleSubmit}
+              disabled={loading} // Desativa o botão ao carregar
             >
-              <Text style={styles.submitButtonText}>Enviar Reporte</Text>
+              {loading ? (
+                <ActivityIndicator size="small" color="#FFF" />
+              ) : (
+                <Text style={styles.submitButtonText}>Enviar Reporte</Text>
+              )}
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setModalVisible(false)}>
               <Text style={styles.closeButton}>Fechar</Text>
