@@ -7,159 +7,343 @@ import {
   View,
   ActivityIndicator,
   ScrollView,
-  TouchableWithoutFeedback,
-  Keyboard,
   RefreshControl,
+  StyleSheet,
+  Animated,
 } from "react-native";
-import { FontAwesome } from '@expo/vector-icons';
-import { getAuth, User } from "firebase/auth";
-import { collection, doc, setDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { collection, doc, setDoc, query, where, getDocs } from "firebase/firestore";
+import DropDownPicker from "react-native-dropdown-picker";
 import { db } from "../../utils/firebase";
 import { useAuth } from "../../context/AuthContext";
-import { styles } from "./styles";
-import { useNavigation } from "@react-navigation/native";
-import { propsStack } from "src/routes/types";
-import { asyncGetUserProfile } from "src/utils/storage/UserStorage";
+import Icon from "react-native-vector-icons/Feather";
 
 export default function Profile() {
   const auth = getAuth();
   const { signOut } = useAuth();
-  const user: User | null = auth.currentUser;
-  const { navigate } = useNavigation<propsStack>();
+  const user = auth.currentUser;
 
-  const [photo, setPhoto] = useState<string | null>(null);
-  const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [dob, setDob] = useState("");
+  const [sala, setSala] = useState("");
   const [number, setNumber] = useState("");
-  const [cpf, setCpf] = useState("");
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [reports, setReports] = useState([]);
+  
+  const [openSalaPicker, setOpenSalaPicker] = useState(false);
+  const [salaOptions] = useState([
+    { label: "1 DSB", value: "1 DSB" },
+    { label: "2 DSB", value: "2 DSB" },
+    { label: "3 DSB", value: "3 DSB" },
+    { label: "1 MKT", value: "1 MKT" },
+    { label: "2 MKT", value: "2 MKT" },
+    { label: "3 MKT", value: "3 MKT" },
+    { label: "1 ADM", value: "1 ADM" },
+    { label: "2 ADM", value: "2 ADM" },
+    { label: "3 ADM", value: "3 ADM" },
+  ]);
 
-
-
-  const formatNumberInput = (inputValue: string): string => {
-    const cleaned = inputValue.replace(/\D/g, "").slice(0, 11);
-    const match = cleaned.match(/^(\d{0,2})(\d{0,5})(\d{0,4})$/);
-    return match
-      ? `(${match[1] || ""}) ${match[2] || ""}-${match[3] || ""}`
-      : inputValue;
-  };
-
-
-  const userLogout = () => {
-    signOut();
-  };
-
-  const fetchUserData = async () => {
-    const userProfile = await asyncGetUserProfile();
-    setUsername(userProfile?.username || "");
-    setName(userProfile?.name || "");
-    setLastName(userProfile?.lastName || "");
-    setDob(userProfile?.dob || "");
-    setCpf(userProfile?.cpf || "");
-    setNumber(userProfile?.number || "");
-  };
+  const animatedValue = new Animated.Value(0);
 
   useEffect(() => {
+    animateCard();
     fetchUserData();
+    fetchUserReports();
   }, []);
+
+  const animateCard = () => {
+    Animated.timing(animatedValue, {
+      toValue: 1,
+      duration: 700,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const cardTranslateY = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [100, 0],
+  });
+
+  const fetchUserData = async () => {
+    if (user) {
+      try {
+        const userQuery = query(collection(db, "users"), where("userId", "==", user.uid));
+        const querySnapshot = await getDocs(userQuery);
+
+        if (!querySnapshot.empty) {
+          const profile = querySnapshot.docs[0].data();
+          setName(profile?.name || "");
+          setLastName(profile?.lastName || "");
+          setSala(profile?.sala || "");
+          setNumber(profile?.number || "");
+        }
+      } catch (error) {
+        console.error("Erro ao buscar dados do usuário:", error);
+      }
+    }
+  };
+
+  const fetchUserReports = async () => {
+    if (user) {
+      const reportsQuery = query(collection(db, "reports"), where("userId", "==", user.uid));
+      const querySnapshot = await getDocs(reportsQuery);
+      const reportsList = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setReports(reportsList);
+    }
+  };
 
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchUserData();
+    await fetchUserReports();
     setRefreshing(false);
   };
 
   const handleSaveProfile = async () => {
+    if (!name || !lastName || !sala || !number) {
+      Alert.alert("Erro", "Preencha todos os campos");
+      return;
+    }
+    if (!user) {
+      Alert.alert("Erro", "Usuário não autenticado");
+      return;
+    }
     try {
       setLoading(true);
-
-      if (!user) {
-        Alert.alert("Erro", "Usuário não autenticado");
-        setLoading(false);
-        return;
-      }
-
-      if (!username || !name || !lastName || !dob || !number || !cpf) {
-        Alert.alert("Erro", "Preencha todos os campos");
-        setLoading(false);
-        return;
-      }
-
       const userRef = doc(collection(db, "users"), user.uid);
-      await setDoc(
-        userRef,
-        { username, name, lastName, dob, number, cpf },
-        { merge: true }
-      );
-
-      Alert.alert("Sucesso", "Dados atualizados com sucesso");
-    } catch (error) {
-      Alert.alert(
-        "Erro",
-        "Houve um erro ao salvar os dados. Tente novamente mais tarde."
-      );
+      await setDoc(userRef, { userId: user.uid, name, lastName, sala, number }, { merge: true });
+      Alert.alert("Sucesso", "Dados atualizados");
+      setEditing(false);
+    } catch {
+      Alert.alert("Erro", "Erro ao salvar dados");
     } finally {
       setLoading(false);
     }
   };
 
+  const formatPhoneNumber = (text) => {
+    const cleaned = text.replace(/\D/g, "").slice(0, 11); // Limita a 11 dígitos
+    const formatted = cleaned
+      .replace(/^(\d{2})(\d)/, "($1) $2") // Formata o DDD
+      .replace(/(\d{5})(\d{4})$/, "$1-$2"); // Formata o número principal
+    setNumber(formatted);
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Pendente":
+        return { color: "#FFA500" };
+      case "Em Análise":
+        return { color: "#1E90FF" };
+      case "Concluído":
+        return { color: "#32CD32" };
+      default:
+        return { color: "#333" };
+    }
+  };
+
   return (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-        </View>
-        <Text style={styles.formTitle}>Cadastrar Dados</Text>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.formTitle}>Perfil</Text>
+        <Pressable onPress={signOut}>
+          <Icon name="log-out" size={28} color="#FFF" />
+        </Pressable>
+      </View>
+      
+      <Animated.View
+        style={[styles.formCard, { transform: [{ translateY: cardTranslateY }] }]}
+      >
         <ScrollView
           contentContainerStyle={styles.scrollViewContent}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          showsVerticalScrollIndicator={false} // Oculta a barra de rolagem
         >
           <TextInput
-            style={styles.formInput}
-            placeholder="Nome de usuário"
-            placeholderTextColor="#FFF"
-            onChangeText={setUsername}
-            value={username}
-          />
-          <TextInput
-            style={styles.formInput}
-            placeholder="Digite seu nome"
-            placeholderTextColor="#FFF"
+            style={[styles.formInput, { backgroundColor: editing ? "#FAFAFA" : "#EFEFEF" }]}
+            placeholder="Nome"
+            placeholderTextColor="#A9A9A9"
             onChangeText={setName}
             value={name}
+            editable={editing}
           />
           <TextInput
-            style={styles.formInput}
-            placeholder="Digite seu sobrenome"
-            placeholderTextColor="#FFF"
+            style={[styles.formInput, { backgroundColor: editing ? "#FAFAFA" : "#EFEFEF" }]}
+            placeholder="Sobrenome"
+            placeholderTextColor="#A9A9A9"
             onChangeText={setLastName}
             value={lastName}
+            editable={editing}
           />
-      
+          
+          {editing ? (
+            <DropDownPicker
+              open={openSalaPicker}
+              value={sala}
+              items={salaOptions}
+              setOpen={setOpenSalaPicker}
+              setValue={setSala}
+              placeholder="Selecione a sala"
+              style={styles.dropdown}
+              dropDownContainerStyle={styles.dropdownContainer}
+            />
+          ) : (
+            <TextInput
+              style={[styles.formInput, { backgroundColor: "#EFEFEF" }]}
+              placeholder="Sala"
+              placeholderTextColor="#A9A9A9"
+              value={sala}
+              editable={false}
+            />
+          )}
+
           <TextInput
-            style={styles.formInput}
-            placeholder="Digite seu número de celular"
-            placeholderTextColor="#FFF"
-            onChangeText={(text) => setNumber(formatNumberInput(text))}
+            style={[styles.formInput, { backgroundColor: editing ? "#FAFAFA" : "#EFEFEF" }]}
+            placeholder="Número de celular"
+            placeholderTextColor="#A9A9A9"
+            onChangeText={formatPhoneNumber}
             value={number}
             keyboardType="phone-pad"
+            editable={editing}
           />
-          <Pressable style={styles.formButton} onPress={handleSaveProfile} disabled={loading}>
-            {loading ? (
-              <ActivityIndicator size="small" color="#FFF" />
-            ) : (
-              <Text style={styles.textButton}>Cadastrar Dados</Text>
-            )}
+
+          <Pressable style={styles.editButton} onPress={() => setEditing(!editing)}>
+            <Text style={styles.textButton}>{editing ? "Cancelar" : "Editar Perfil"}</Text>
           </Pressable>
-          <Pressable style={styles.logoutButton} onPress={userLogout}>
-            <Text style={styles.textButton}>Logout</Text>
-          </Pressable>
+
+          {editing && (
+            <Pressable style={styles.formButton} onPress={handleSaveProfile} disabled={loading}>
+              {loading ? <ActivityIndicator size="small" color="#FFF" /> : <Text style={styles.textButton}>Salvar</Text>}
+            </Pressable>
+          )}
+
+          <Text style={styles.sectionTitle}>Suas Denúncias</Text>
+          {reports.map((item) => (
+            <View key={item.id} style={styles.reportItem}>
+              <Text style={styles.reportText}>Tipo: {item.bullyingType}</Text>
+              <Text style={styles.reportText}>Descrição: {item.description}</Text>
+              <Text style={[styles.reportText, getStatusColor(item.status)]}>Status: {item.status}</Text>
+            </View>
+          ))}
+          {reports.length === 0 && (
+            <Text style={styles.emptyText}>Nenhuma denúncia encontrada.</Text>
+          )}
         </ScrollView>
-      </View>
-    </TouchableWithoutFeedback>
+      </Animated.View>
+    </View>
   );
 }
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#8B0000",
+    alignItems: "center",
+  },
+  header: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 50,
+  },
+  formCard: {
+    width: "100%",
+    backgroundColor: "#FFF",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
+    elevation: 8,
+  },
+  dropdown: {
+    borderColor: "#DDD",
+    borderWidth: 1,
+    borderRadius: 8,
+    backgroundColor: "#FAFAFA",
+  },
+  dropdownContainer: {
+    borderColor: "#DDD",
+  },
+  formTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#FFF",
+    textAlign: "center",
+  },
+  scrollViewContent: {},
+  formInput: {
+    width: "100%",
+    padding: 12,
+    marginVertical: 10,
+    borderColor: "#8B0000",
+    borderWidth: 1,
+    borderRadius: 8,
+    color: "#333",
+    fontSize: 16,
+  },
+  formButton: {
+    width: "100%",
+    paddingVertical: 14,
+    backgroundColor: "#8B0000",
+    borderRadius: 8,
+    alignItems: "center",
+    marginVertical: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 6,
+  },
+  editButton: {
+    width: "100%",
+    paddingVertical: 14,
+    backgroundColor: "#8B0000",
+    borderRadius: 8,
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  textButton: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#B22222",
+    marginTop: 30,
+    marginBottom: 10,
+  },
+  reportItem: {
+    width: "100%",
+    backgroundColor: "#FFF",
+    padding: 15,
+    borderRadius: 10,
+    marginVertical: 8,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  reportText: {
+    color: "#333",
+    fontSize: 16,
+  },
+  emptyText: {
+    color: "#A9A9A9",
+    fontSize: 16,
+    textAlign: "center",
+    marginVertical: 20,
+  },
+});

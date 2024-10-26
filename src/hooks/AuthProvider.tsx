@@ -5,9 +5,12 @@ import { User } from "firebase/auth";
 import Credentials from "../models/Credentials";
 import { signUpApi } from "../api/SignUp";
 import { signInApi } from "../api/SignIn";
-import { asyncGetAuth, asyncRemoveAuth, asyncSetAuth } from "src/utils/storage/AuthStorage";
+import {
+  asyncGetAuth,
+  asyncRemoveAuth,
+  asyncSetAuth,
+} from "src/utils/storage/AuthStorage";
 import { asyncRemoveUser } from "src/utils/storage/UserStorage";
-
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -69,7 +72,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           onPress: async () => {
             setAuthData(undefined);
             await asyncRemoveAuth();
-            await asyncRemoveUser()
+            await asyncRemoveUser();
           },
         },
       ],

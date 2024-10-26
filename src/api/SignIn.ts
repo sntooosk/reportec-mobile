@@ -1,4 +1,3 @@
-
 import { signInWithEmailAndPassword, UserCredential } from "firebase/auth";
 import { auth } from "../utils/firebase";
 import { localizeErrorMap } from "../utils/firebase/firebaseTraslator";

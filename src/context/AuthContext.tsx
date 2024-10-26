@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext } from "react";
 import { User } from "firebase/auth";
 import Credentials from "../models/Credentials";
