@@ -18,12 +18,12 @@ export default function TabRoutes() {
           headerShown: false,
           tabBarShowLabel: false,
           tabBarStyle: {
-            backgroundColor: "#B22222",
+            backgroundColor: "#8B0000",
             borderTopWidth: 0,
             elevation: 10,
           },
           tabBarActiveTintColor: "#FFFFFF",
-          tabBarInactiveTintColor: "#FF6347",
+          tabBarInactiveTintColor: "#F5F5F5",
         }}
       >
         <Tab.Screen

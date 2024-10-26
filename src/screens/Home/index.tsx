@@ -142,8 +142,11 @@ export default function Home() {
                   <Text style={styles.submitButtonText}>Enviar Reporte</Text>
                 )}
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Text style={styles.closeButton}>Fechar</Text>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>Fechar</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -230,9 +233,16 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   closeButton: {
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor:"#8B0000",
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  closeButtonText: {
     color: "#8B0000",
     fontSize: 16,
-    textAlign: "center",
-    marginTop: 10,
+    fontWeight: "bold",
   },
 });

@@ -66,18 +66,20 @@ export default function FAQScreen() {
 
   return (
     <>
-      <Header title="FAQ sobre Bullying" />
-      <ScrollView style={styles.container}>
+      <Header title="FAQ" />
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           {faqData.map((item, index) => (
-            <View key={index} style={styles.faqItem}>
+            <View key={index} style={styles.card}>
               <TouchableOpacity
                 style={styles.questionContainer}
                 onPress={() => toggleExpand(index)}
               >
                 <Text style={styles.questionText}>{item.question}</Text>
                 <Icon
-                  name={expandedIndex === index ? "minus-circle" : "plus-circle"}
+                  name={
+                    expandedIndex === index ? "minus-circle" : "plus-circle"
+                  }
                   size={20}
                   color="#B22222"
                 />
@@ -96,7 +98,7 @@ export default function FAQScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#8B0000",
+    backgroundColor: "#FFF",
   },
   content: {
     backgroundColor: "#FFF",
@@ -105,14 +107,20 @@ const styles = StyleSheet.create({
     padding: 20,
     marginTop: -10,
   },
-  faqItem: {
+  card: {
+    backgroundColor: "#FFF",
+    padding: 15,
     marginBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#DDD",
-    paddingBottom: 10,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   questionContainer: {
     flexDirection: "row",
+    width: "100%",
     justifyContent: "space-between",
     alignItems: "center",
   },

@@ -267,14 +267,14 @@ export default function Profile() {
 
           {editing && (
             <Pressable
-              style={styles.formButton}
+              style={styles.formButtonSalvar}
               onPress={handleSaveProfile}
               disabled={loading}
             >
               {loading ? (
                 <ActivityIndicator size="small" color="#FFF" />
               ) : (
-                <Text style={styles.textButton}>Salvar</Text>
+                <Text style={styles.textButtonSalvar}>Salvar</Text>
               )}
             </Pressable>
           )}
@@ -360,13 +360,13 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   dropdown: {
-    borderColor: "#DDD",
+    borderColor: "#8B0000",
     borderWidth: 1,
     borderRadius: 8,
     backgroundColor: "#FAFAFA",
   },
   dropdownContainer: {
-    borderColor: "#DDD",
+    borderColor: "#8B0000",
   },
   formTitle: {
     fontSize: 24,
@@ -386,17 +386,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   formButton: {
-    width: "100%",
     paddingVertical: 14,
     backgroundColor: "#8B0000",
     borderRadius: 8,
     alignItems: "center",
-    marginVertical: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 6,
+  },
+  formButtonSalvar: {
+    paddingVertical: 14,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "#8B0000",
+    alignItems: "center",
+  },
+  textButtonSalvar: {
+    color: "#8B0000",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   editButton: {
     width: "100%",
