@@ -16,6 +16,7 @@ import {
   collection,
   doc,
   setDoc,
+  deleteDoc,
   query,
   where,
   getDocs,
@@ -38,7 +39,6 @@ export default function Profile() {
   const [refreshing, setRefreshing] = useState(false);
   const [editing, setEditing] = useState(false);
   const [reports, setReports] = useState([]);
-
   const [openSalaPicker, setOpenSalaPicker] = useState(false);
   const [salaOptions] = useState([
     { label: "1 DSB", value: "1 DSB" },
@@ -143,11 +143,24 @@ export default function Profile() {
     }
   };
 
+  const handleDeleteReport = async (reportId) => {
+    try {
+      await deleteDoc(doc(db, "reports", reportId));
+      Alert.alert("Sucesso", "Denúncia excluída com sucesso.");
+      setReports((prevReports) =>
+        prevReports.filter((item) => item.id !== reportId)
+      );
+    } catch (error) {
+      console.error("Erro ao excluir denúncia:", error);
+      Alert.alert("Erro", "Não foi possível excluir a denúncia.");
+    }
+  };
+
   const formatPhoneNumber = (text) => {
-    const cleaned = text.replace(/\D/g, "").slice(0, 11); // Limita a 11 dígitos
+    const cleaned = text.replace(/\D/g, "").slice(0, 11);
     const formatted = cleaned
-      .replace(/^(\d{2})(\d)/, "($1) $2") // Formata o DDD
-      .replace(/(\d{5})(\d{4})$/, "$1-$2"); // Formata o número principal
+      .replace(/^(\d{2})(\d)/, "($1) $2")
+      .replace(/(\d{5})(\d{4})$/, "$1-$2");
     setNumber(formatted);
   };
 
@@ -157,7 +170,7 @@ export default function Profile() {
         return { color: "#FFA500" };
       case "Em Análise":
         return { color: "#1E90FF" };
-      case "Concluído":
+      case "Resolvido":
         return { color: "#32CD32" };
       default:
         return { color: "#333" };
@@ -184,7 +197,7 @@ export default function Profile() {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
-          showsVerticalScrollIndicator={false} // Oculta a barra de rolagem
+          showsVerticalScrollIndicator={false}
         >
           <TextInput
             style={[
@@ -278,11 +291,23 @@ export default function Profile() {
                 <Text style={styles.reportValue}>{item.description}</Text>
               </View>
               <View style={styles.reportTextRow}>
+                <Text style={styles.reportLabel}>Resposta: </Text>
+                <Text style={styles.reportValue}>
+                  {item.response ? item.response : "Sem resposta"}
+                </Text>
+              </View>
+              <View style={styles.reportTextRow}>
                 <Text style={styles.reportLabel}>Status: </Text>
                 <Text style={[styles.reportValue, getStatusColor(item.status)]}>
                   {item.status}
                 </Text>
               </View>
+              <Pressable
+                style={styles.deleteButton}
+                onPress={() => handleDeleteReport(item.id)}
+              >
+                <Icon name="trash" size={24} color="#B22222" />
+              </Pressable>
             </View>
           ))}
           {reports.length === 0 && (
@@ -293,6 +318,7 @@ export default function Profile() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -318,8 +344,8 @@ const styles = StyleSheet.create({
   },
   reportValue: {
     color: "#333",
+    flexShrink: 1, 
   },
-  
   formCard: {
     width: "100%",
     backgroundColor: "#FFF",
@@ -405,10 +431,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 4,
+    position: "relative",
+    alignSelf: "stretch",
   },
-  reportText: {
-    color: "#333",
-    fontSize: 16,
+  deleteButton: {
+    position: "absolute",
+    right: 10,
+    top: 10,
   },
   emptyText: {
     color: "#A9A9A9",
