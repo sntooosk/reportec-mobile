@@ -13,6 +13,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../utils/firebase";
 import { getAuth } from "firebase/auth";
+import Header from "../components/Header";
 
 export default function Home() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -90,62 +91,65 @@ export default function Home() {
   };
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.reportButton}
-        onPress={() => setModalVisible(true)}
-      >
-        <Text style={styles.reportButtonText}>Reportar Caso de Bullying</Text>
-      </TouchableOpacity>
+    <>
+      <Header title="Reporte" />
+      <View style={styles.container}>
+        <TouchableOpacity
+          style={styles.reportButton}
+          onPress={() => setModalVisible(true)}
+        >
+          <Text style={styles.reportButtonText}>Reportar Caso de Bullying</Text>
+        </TouchableOpacity>
 
-      <Modal
-        animationType="slide"
-        transparent
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>
-              Formulário de Reporte de Bullying
-            </Text>
+        <Modal
+          animationType="slide"
+          transparent
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>
+                Formulário de Reporte de Bullying
+              </Text>
 
-            <DropDownPicker
-              open={open}
-              value={bullyingType}
-              items={items}
-              setOpen={setOpen}
-              setValue={setBullyingType}
-              placeholder="Selecione a modalidade"
-              style={styles.dropdown}
-              dropDownContainerStyle={styles.dropdownContainer}
-            />
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              placeholder="Descrição"
-              placeholderTextColor="#A9A9A9"
-              value={description}
-              onChangeText={setDescription}
-              multiline
-            />
-            <TouchableOpacity
-              style={styles.submitButton}
-              onPress={handleSubmit}
-              disabled={loading} // Desativa o botão ao carregar
-            >
-              {loading ? (
-                <ActivityIndicator size="small" color="#FFF" />
-              ) : (
-                <Text style={styles.submitButtonText}>Enviar Reporte</Text>
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setModalVisible(false)}>
-              <Text style={styles.closeButton}>Fechar</Text>
-            </TouchableOpacity>
+              <DropDownPicker
+                open={open}
+                value={bullyingType}
+                items={items}
+                setOpen={setOpen}
+                setValue={setBullyingType}
+                placeholder="Selecione a modalidade"
+                style={styles.dropdown}
+                dropDownContainerStyle={styles.dropdownContainer}
+              />
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                placeholder="Descrição"
+                placeholderTextColor="#A9A9A9"
+                value={description}
+                onChangeText={setDescription}
+                multiline
+              />
+              <TouchableOpacity
+                style={styles.submitButton}
+                onPress={handleSubmit}
+                disabled={loading} // Desativa o botão ao carregar
+              >
+                {loading ? (
+                  <ActivityIndicator size="small" color="#FFF" />
+                ) : (
+                  <Text style={styles.submitButtonText}>Enviar Reporte</Text>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <Text style={styles.closeButton}>Fechar</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </Modal>
-    </View>
+        </Modal>
+      </View>
+    </>
   );
 }
 
