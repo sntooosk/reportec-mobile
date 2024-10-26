@@ -51,8 +51,6 @@ export default function ReplacePass() {
 
   return (
     <View style={styles.container}>
-      <Image style={styles.logo} source={require("../../assets/logo.png")} />
-
       <Animated.View
         style={[
           styles.formCard,
@@ -84,14 +82,9 @@ export default function ReplacePass() {
           )}
         </Pressable>
 
-        <View style={styles.subContainer}>
-          <Pressable
-            style={styles.subButton}
-            onPress={() => navigate("SignIn")}
-          >
-            <Text style={styles.subTextButton}>Voltar</Text>
-          </Pressable>
-        </View>
+        <Pressable style={styles.subButton} onPress={() => navigate("SignIn")}>
+          <Text style={styles.subTextButton}>Voltar</Text>
+        </Pressable>
       </Animated.View>
     </View>
   );
@@ -104,13 +97,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  logo: {
-    width: 120,
-    height: 120,
-    marginTop: 60,
-    marginBottom: 20,
-    resizeMode: "contain",
-  },
   formCard: {
     position: "absolute",
     top: "30%",
@@ -121,11 +107,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     padding: 20,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
   },
   formTitle: {
     fontSize: 24,
@@ -152,25 +133,20 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     marginVertical: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
   },
   textButton: {
     color: "#FFF",
     fontSize: 16,
     fontWeight: "bold",
   },
-  subContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 20,
-  },
   subButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    width: "90%",
+    paddingVertical: 14,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "#8B0000",
+    alignItems: "center",
+    marginVertical: 12,
   },
   subTextButton: {
     color: "#8B0000",

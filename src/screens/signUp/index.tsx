@@ -58,8 +58,6 @@ export default function SignUp() {
 
   return (
     <View style={styles.container}>
-      <Image style={styles.logo} source={require("../../assets/logo.png")} />
-
       <Animated.View
         style={[
           styles.formCard,
@@ -150,13 +148,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  logo: {
-    width: 120,
-    height: 120,
-    marginTop: 60,
-    marginBottom: 20,
-    resizeMode: "contain",
-  },
   formTitle: {
     fontSize: 24,
     fontWeight: "bold",
@@ -174,11 +165,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     padding: 20,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
   },
   formInput: {
     width: "90%",
@@ -219,11 +205,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     marginVertical: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
   },
   textButton: {
     color: "#FFF",
@@ -231,7 +212,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   subButton: {
-    paddingVertical: 10,
+    borderWidth:2,
+    width: "90%",
+    paddingVertical: 14,
+    borderRadius: 8,
+    borderColor:"#8B0000",
+    alignItems: "center",
+    marginVertical: 12,
   },
   subTextButton: {
     color: "#8B0000",

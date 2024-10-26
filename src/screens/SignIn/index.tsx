@@ -103,14 +103,11 @@ export default function SignIn() {
             <Text style={styles.textButton}>Logar</Text>
           )}
         </Pressable>
+        <Pressable style={styles.formButtonCad} onPress={() => navigate("SignUp")}>
+          <Text style={styles.formButtonCardText}>Cadastrar</Text>
+        </Pressable>
 
         <View style={styles.subContainer}>
-          <Pressable
-            style={styles.subButton}
-            onPress={() => navigate("SignUp")}
-          >
-            <Text style={styles.subTextButton}>Cadastrar</Text>
-          </Pressable>
           <Pressable
             style={styles.subButton}
             onPress={() => navigate("ReplacePass")}
@@ -153,11 +150,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     padding: 20,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
   },
   formInput: {
     width: "90%",
@@ -198,14 +190,23 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     marginVertical: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
+  },
+  formButtonCad:{
+    width: "90%",
+    paddingVertical: 14,
+    borderRadius: 8,
+    borderWidth:2,
+    borderColor:"#8B0000",
+    alignItems: "center",
+    marginVertical: 12,
   },
   textButton: {
     color: "#FFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  formButtonCardText: {
+    color: "#8B0000",
     fontSize: 16,
     fontWeight: "bold",
   },
