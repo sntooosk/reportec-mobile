@@ -1,107 +1,241 @@
-import { Alert, Pressable, Text, TextInput, View, ActivityIndicator } from "react-native";
-import { useState } from "react";
-import { useAuth } from '../../context/AuthContext';
-import { useNavigation } from '@react-navigation/native';
-import { styles } from '../../utils/styles';
-import { propsStack } from '../../routes/types';
-import Icon from 'react-native-vector-icons/Feather'; // Biblioteca de ícones
+import React, { useState } from "react";
+import {
+  Alert,
+  Pressable,
+  Text,
+  TextInput,
+  View,
+  Image,
+  ActivityIndicator,
+  StyleSheet,
+  Animated,
+} from "react-native";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigation } from "@react-navigation/native";
+import { propsStack } from "../../routes/types";
+import Icon from "react-native-vector-icons/Feather";
 
 export default function SignUp() {
-    const [email, setEmail] = useState('');
-    const [cpf, setCpf] = useState('');
-    const [password, setPassword] = useState('');
-    const [passwordRep, setPasswordRep] = useState('');
-    const [showPassword, setShowPassword] = useState(false); // Estado para visibilidade da senha
-    const [showPasswordRep, setShowPasswordRep] = useState(false); // Estado para visibilidade da repetição da senha
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordRep, setPasswordRep] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordRep, setShowPasswordRep] = useState(false);
 
-    const { navigate } = useNavigation<propsStack>();
-    const { signUp, isLoading } = useAuth();
+  const { navigate } = useNavigation<propsStack>();
+  const { signUp, isLoading } = useAuth();
 
-    const newUser = async () => {
-        if (password !== passwordRep) {
-            Alert.alert("Erro", "As senhas não coincidem.");
-            return;
-        }
+  const animatedValue = new Animated.Value(0);
 
-        try {
-            await signUp({ email, password });
-            navigate("SignIn");
-        } catch (error) { }
-    };
+  const animateCard = () => {
+    Animated.timing(animatedValue, {
+      toValue: 1,
+      duration: 700,
+      useNativeDriver: true,
+    }).start();
+  };
 
-    return (
-        <View style={styles.container}>
-            <Text style={styles.formTitle}> Primeiro acesso </Text>
+  React.useEffect(() => {
+    animateCard();
+  }, []);
 
-            <TextInput
-                style={styles.formInput}
-                placeholder="E-mail de usuário"
-                placeholderTextColor="#fff" 
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-                value={email}
-                onChangeText={setEmail}
+  const cardTranslateY = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [100, 0],
+  });
+
+  const newUser = async () => {
+    if (password !== passwordRep) {
+      Alert.alert("Erro", "As senhas não coincidem.");
+      return;
+    }
+
+    try {
+      await signUp({ email, password });
+      navigate("SignIn");
+    } catch (error) {}
+  };
+
+  return (
+    <View style={styles.container}>
+      <Image style={styles.logo} source={require("../../assets/logo.png")} />
+
+      <Animated.View
+        style={[
+          styles.formCard,
+          { transform: [{ translateY: cardTranslateY }] },
+        ]}
+      >
+        <Text style={styles.formTitle}>Cadastro</Text>
+
+        <TextInput
+          style={styles.formInput}
+          placeholder="E-mail de usuário"
+          placeholderTextColor="#A0A0A0"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoComplete="email"
+          value={email}
+          onChangeText={setEmail}
+        />
+
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.formInputPassword}
+            placeholder="Senha de usuário"
+            placeholderTextColor="#A0A0A0"
+            autoCapitalize="none"
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <Pressable
+            style={styles.iconContainer}
+            onPress={() => setShowPassword(!showPassword)}
+          >
+            <Icon
+              name={showPassword ? "eye" : "eye-off"}
+              size={24}
+              color="#A0A0A0"
             />
-
-            {/* Campo de senha com ícone de olho */}
-            <View style={styles.passwordContainer}>
-                <TextInput
-                    style={styles.formInputPassword} // Estilo ajustado
-                    placeholder="Senha de usuário"
-                    placeholderTextColor="#fff" 
-                    autoCapitalize="none"
-                    secureTextEntry={!showPassword} // Controla a visibilidade da senha
-                    value={password}
-                    onChangeText={setPassword}
-                />
-                <Pressable style={styles.iconContainer} onPress={() => setShowPassword(!showPassword)}>
-                    <Icon 
-                        name={showPassword ? "eye" : "eye-off"} // Alterna o ícone entre olho aberto e fechado
-                        size={24} 
-                        color="#fff"
-                    />
-                </Pressable>
-            </View>
-
-            {/* Campo de repetição de senha com ícone de olho */}
-            <View style={styles.passwordContainer}>
-                <TextInput
-                    style={styles.formInputPassword} // Estilo ajustado
-                    placeholder="Repita a senha"
-                    placeholderTextColor="#fff" 
-                    autoCapitalize="none"
-                    secureTextEntry={!showPasswordRep} // Controla a visibilidade da repetição da senha
-                    value={passwordRep}
-                    onChangeText={setPasswordRep}
-                />
-                <Pressable style={styles.iconContainer} onPress={() => setShowPasswordRep(!showPasswordRep)}>
-                    <Icon 
-                        name={showPasswordRep ? "eye" : "eye-off"} // Alterna o ícone entre olho aberto e fechado
-                        size={24} 
-                        color="#fff"
-                    />
-                </Pressable>
-            </View>
-
-            <Pressable
-                style={styles.formButton}
-                onPress={newUser}
-                disabled={isLoading}
-            >
-                {isLoading ? (
-                    <ActivityIndicator size="small" color="#FFF" />
-                ) : (
-                    <Text style={styles.textButton}>Cadastrar</Text>
-                )}
-            </Pressable>
-
-            <Pressable
-                style={styles.subButton}
-                onPress={() => navigate("SignIn")}
-            >
-                <Text style={styles.subTextButton}>Voltar</Text>
-            </Pressable>
+          </Pressable>
         </View>
-    );
+
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.formInputPassword}
+            placeholder="Repita a senha"
+            placeholderTextColor="#A0A0A0"
+            autoCapitalize="none"
+            secureTextEntry={!showPasswordRep}
+            value={passwordRep}
+            onChangeText={setPasswordRep}
+          />
+          <Pressable
+            style={styles.iconContainer}
+            onPress={() => setShowPasswordRep(!showPasswordRep)}
+          >
+            <Icon
+              name={showPasswordRep ? "eye" : "eye-off"}
+              size={24}
+              color="#A0A0A0"
+            />
+          </Pressable>
+        </View>
+
+        <Pressable
+          style={styles.formButton}
+          onPress={newUser}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#FFF" />
+          ) : (
+            <Text style={styles.textButton}>Cadastrar</Text>
+          )}
+        </Pressable>
+
+        <Pressable style={styles.subButton} onPress={() => navigate("SignIn")}>
+          <Text style={styles.subTextButton}>Voltar</Text>
+        </Pressable>
+      </Animated.View>
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#8B0000",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    marginTop: 60,
+    marginBottom: 20,
+    resizeMode: "contain",
+  },
+  formTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#8B0000",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  formCard: {
+    position: "absolute",
+    top: "30%",
+    bottom: 0,
+    width: "100%",
+    backgroundColor: "#FFF",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  formInput: {
+    width: "90%",
+    padding: 12,
+    marginVertical: 10,
+    borderColor: "#8B0000",
+    borderWidth: 1,
+    borderRadius: 8,
+    color: "#333333",
+    fontSize: 16,
+    backgroundColor: "#FAFAFA",
+  },
+  passwordContainer: {
+    width: "90%",
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  formInputPassword: {
+    flex: 1,
+    padding: 12,
+    borderColor: "#8B0000",
+    borderWidth: 1,
+    borderRadius: 8,
+    color: "#333333",
+    fontSize: 16,
+    backgroundColor: "#FAFAFA",
+  },
+  iconContainer: {
+    position: "absolute",
+    right: 12,
+    padding: 8,
+  },
+  formButton: {
+    width: "90%",
+    paddingVertical: 14,
+    backgroundColor: "#8B0000",
+    borderRadius: 8,
+    alignItems: "center",
+    marginVertical: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4, 
+    elevation: 5,
+  },
+  textButton: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  subButton: {
+    paddingVertical: 10,
+  },
+  subTextButton: {
+    color: "#8B0000",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});
