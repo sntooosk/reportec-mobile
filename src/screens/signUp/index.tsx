@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
-    shadowRadius: 4, 
+    shadowRadius: 4,
     elevation: 5,
   },
   textButton: {

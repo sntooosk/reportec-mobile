@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
   },
   reportValue: {
     color: "#333",
-    flexShrink: 1, 
+    flexShrink: 1,
   },
   formCard: {
     width: "100%",

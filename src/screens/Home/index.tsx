@@ -23,7 +23,7 @@ export default function Home() {
   const [userInfo, setUserInfo] = useState({
     name: "",
     lastName: "",
-    sala: ""
+    sala: "",
   });
 
   const [items] = useState([
@@ -41,7 +41,10 @@ export default function Home() {
   useEffect(() => {
     const fetchUserData = async () => {
       if (user) {
-        const userQuery = query(collection(db, "users"), where("userId", "==", user.uid));
+        const userQuery = query(
+          collection(db, "users"),
+          where("userId", "==", user.uid)
+        );
         const querySnapshot = await getDocs(userQuery);
 
         if (!querySnapshot.empty) {
@@ -49,7 +52,7 @@ export default function Home() {
           setUserInfo({
             name: userData.name || "",
             lastName: userData.lastName || "",
-            sala: userData.sala || ""
+            sala: userData.sala || "",
           });
         }
       }

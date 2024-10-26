@@ -1,8 +1,8 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { propsNavigationStack } from "./types";
-import SignIn from "src/screens/SignIn";
-import ReplacePass from "src/screens/ReplacePass";
-import SignUp from "src/screens/signUp";
+import SignIn from "../screens/SignIn";
+import SignUp from "../screens/signUp";
+import ReplacePass from "../screens/ReplacePass";
 
 const Stack = createNativeStackNavigator<propsNavigationStack>();
 

@@ -9,8 +9,7 @@ import {
   asyncGetAuth,
   asyncRemoveAuth,
   asyncSetAuth,
-} from "src/utils/storage/AuthStorage";
-import { asyncRemoveUser } from "src/utils/storage/UserStorage";
+} from "../utils/storage/AuthStorage";
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -29,6 +28,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const user = await asyncGetAuth();
     if (user) {
       setAuthData(user);
+      console.log(user);
     }
     setIsLoading(false);
   }
@@ -38,6 +38,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setIsLoading(true);
       const { user } = await signInApi(email, password);
       await asyncSetAuth(user);
+      console.log(user);
       setAuthData(user);
     } catch (err: any) {
       Alert.alert("Atenção", err.message);
@@ -72,7 +73,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           onPress: async () => {
             setAuthData(undefined);
             await asyncRemoveAuth();
-            await asyncRemoveUser();
           },
         },
       ],
